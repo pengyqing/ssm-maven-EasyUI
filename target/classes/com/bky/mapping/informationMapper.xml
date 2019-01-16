@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bky.dao.informationMapper">
+  <resultMap id="BaseResultMap" type="com.bky.model.Student">
+    <id column="Id" jdbcType="INTEGER" property="id" />
+    <result column="stu_number" jdbcType="VARCHAR" property="stuNumber" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="sex" jdbcType="VARCHAR" property="sex" />
+    
+    <result column="department" jdbcType="VARCHAR" property="department" />
+    <result column="grade" jdbcType="VARCHAR" property="grade" />
+    <result column="classesCard" jdbcType="VARCHAR" property="classesCard" />
+    
+    <result column="build" jdbcType="VARCHAR" property="build" />
+    <result column="dormNum" jdbcType="VARCHAR" property="dormNum" />
+  </resultMap>
+  
+  <sql id="Base_Column_List">
+    id, stu_number, name, sex
+  </sql>
+  
+  <select id="selectByClassesCard" resultType="com.bky.model.Classes">
+    select * from classes where classes_card = #{classesCard} limit 0,1
+  </select>
+  
+  <select id="selectBydormNum" resultType="com.bky.model.Dormitory">
+    select * from dormitory where dorm_num = #{dormNum} limit 0,1
+  </select>
+  
+  <select id="selectBySubject" resultType="com.bky.model.Score">
+    select * from score where subject = #{subject} and stu_id = #{stuId} limit 0,1
+  </select>
+  
+  <select id="selectByStuId" resultType="com.bky.model.Student">
+    select * from student where id = #{id} limit 0,1
+  </select>
+  
+  <select id="getAll"  resultType="java.util.Map">
+    select s.id as id,s.stu_number as stuNumber,s.name as name,s.sex as sex,
+    date_format(s.create_time, '%Y-%c-%d %h:%i:%s' ) as createTime,
+    date_format(s.update_time, '%Y-%c-%d %h:%i:%s' ) as updateTime,c.department as department,
+    c.grade as grade,c.classes_card as classesCard,d.build as build,d.dorm_num as dormNum
+    from `student` s left join `classes` c on s.classes_id = c.`id` left join `dormitory` d on s.dormitory_id = d.`id`
+    <where>
+    <if test="department != null and department != '' " >
+	      and c.department = #{department,jdbcType=VARCHAR}
+	</if> 
+	<if test="stuNumber != null and stuNumber != '' " >
+	      and s.stu_number = #{stuNumber,jdbcType=VARCHAR}
+	</if>   
+    </where>
+    limit #{page},#{rows}
+  </select>
+  
+  <select id="count"  resultType="java.lang.Integer">
+    select count(1)
+    from `student` s left join `classes` c on s.classes_id = c.`id` left join `dormitory` d on s.dormitory_id = d.`id`
+    <where>
+    <if test="department != null and department != '' " >
+	      and c.department = #{department,jdbcType=VARCHAR}
+	</if> 
+	<if test="stuNumber != null and stuNumber != '' " >
+	      and s.stu_number = #{stuNumber,jdbcType=VARCHAR}
+	</if>   
+    </where>
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from student
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  
+  <select id="getAll1"  resultType="java.util.Map">
+    select * from `dormitory`
+    <where>
+    <if test="department != null and department != '' " >
+	      department = #{department,jdbcType=VARCHAR}
+	</if> 
+    </where>
+    limit #{page},#{rows}
+  </select>
+  
+  <select id="count1"  resultType="java.lang.Integer">
+    select count(1) from `dormitory`
+    <where>
+    <if test="department != null and department != '' " >
+	      department = #{department,jdbcType=VARCHAR}
+	</if> 
+    </where>
+  </select>
+  
+  <delete id="deleteByPrimaryKey1" parameterType="java.lang.Integer">
+    delete from dormitory
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  
+  <select id="getAll2"  resultType="java.util.Map">
+    select s.id as id,s.stu_number as stuNumber,s.name as name,
+    date_format(s.create_time, '%Y-%c-%d %h:%i:%s' ) as createTime,
+    c.department as department,sc.id as scid,
+    c.grade as grade,c.classes_card as classesCard,sc.`subject` as subject,sc.`mark` as mark
+    from `student` s left join `classes` c on s.classes_id = c.`id` left join `score` sc on sc.`stu_id` = s.`id`
+    <where>
+    <if test="stuNumber != null and stuNumber != '' " >
+	      and s.stu_number = #{stuNumber,jdbcType=VARCHAR}
+	</if> 
+	<if test="subject != null and subject != '' " >
+	      and sc.subject = #{subject,jdbcType=VARCHAR}
+	</if>   
+    </where>
+    limit #{page},#{rows}
+  </select>
+  
+  <select id="count2"  resultType="java.lang.Integer">
+    select count(1)
+    from `student` s left join `classes` c on s.classes_id = c.`id` left join `score` sc on sc.`stu_id` = s.`id`
+    <where>
+    <if test="stuNumber != null and stuNumber != '' " >
+	      and s.stu_number = #{stuNumber,jdbcType=VARCHAR}
+	</if> 
+	<if test="subject != null and subject != '' " >
+	      and sc.subject = #{subject,jdbcType=VARCHAR}
+	</if>   
+    </where>
+  </select>
+  
+  <delete id="deleteByPrimaryKey2" parameterType="java.lang.Integer">
+    delete from score
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+ 
+  
+  <insert id="insert1" parameterType="com.bky.model.Student" useGeneratedKeys="true" keyProperty="id">
+    insert into student
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      
+      <if test="stuNumber != null">
+        stu_number,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="sex != null">
+        sex,
+      </if>
+      <if test="classesId != null">
+        classes_id,
+      </if>
+      <if test="dormitoryId != null">
+        dormitory_id,
+      </if>
+     
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+     
+      <if test="stuNumber != null">
+        #{stuNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null">
+        #{sex,jdbcType=VARCHAR},
+      </if>
+      <if test="classesId != null">
+        #{classesId,jdbcType=INTEGER},
+      </if>
+      <if test="dormitoryId != null">
+        #{dormitoryId,jdbcType=INTEGER},
+      </if>
+     
+    </trim>
+  </insert>
+  
+  <insert id="insert2" parameterType="com.bky.model.Classes" useGeneratedKeys="true" keyProperty="id">
+    insert into classes (department,grade,classes_card) values(#{department},#{grade},#{classesCard})
+    <!-- <trim prefix="(" suffix=")" suffixOverrides=",">
+      
+      <if test="department != null">
+        department,
+      </if>
+      <if test="grade != null">
+        grade,
+      </if>
+      <if test="classesCard != null">
+        classes_card,
+      </if>
+      
+    </trim> -->
+    <!-- <trim prefix='values (' suffix=')' suffixOverrides=','>
+     
+      <if test="department != null">
+        #{department,jdbcType=VARCHAR},
+      </if>
+      <if test="grade != null">
+        #{grade,jdbcType=VARCHAR},
+      </if>
+      <if test="classesCard != null">
+        #{classesCard,jdbcType=VARCHAR},
+      </if>
+     
+    </trim> -->
+  </insert>
+  
+  <insert id="insert3" parameterType="com.bky.model.Dormitory" useGeneratedKeys="true" keyProperty="id">
+    insert into dormitory
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      
+      <if test="department != null">
+        department,
+      </if>
+      <if test="build != null">
+        build,
+      </if>
+      <if test="dormNum != null">
+        dorm_num,
+      </if>
+     
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+     
+      <if test="department != null">
+        #{department,jdbcType=VARCHAR},
+      </if>
+      <if test="build != null">
+        #{build,jdbcType=VARCHAR},
+      </if>
+      <if test="dormNum != null">
+        #{dormNum,jdbcType=VARCHAR},
+      </if>
+     
+    </trim>
+  </insert>
+  
+  
+  <insert id="insert4" parameterType="com.bky.model.Score" useGeneratedKeys="true" keyProperty="id">
+    insert into score
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      
+      <if test="subject != null">
+        subject,
+      </if>
+      <if test="mark != null">
+        mark,
+      </if>
+      <if test="stuId != null">
+        stu_id,
+      </if>
+     
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+     
+      <if test="subject != null">
+        #{subject,jdbcType=VARCHAR},
+      </if>
+      <if test="mark != null">
+        #{mark,jdbcType=VARCHAR},
+      </if>
+      <if test="stuId != null">
+        #{stuId,jdbcType=VARCHAR},
+      </if>
+     
+    </trim>
+  </insert>
+  
+  <update id="update" parameterType="com.bky.model.Score">
+    update score
+    <set>
+      <if test="subject != null">
+        subject = #{subject,jdbcType=VARCHAR},
+      </if>
+      <if test="mark != null">
+        mark = #{mark,jdbcType=VARCHAR},
+      </if>
+      
+    </set>
+    where id = #{id}
+    <!-- where subject = #{subject} and stu_id = #{stuId,jdbcType=INTEGER} -->
+  </update>
+  
+  <update id="update1" parameterType="com.bky.model.Classes">
+    update classes
+    <set>
+      <if test="department != null">
+        department = #{department,jdbcType=VARCHAR},
+      </if>
+      <if test="grade != null">
+        grade = #{grade,jdbcType=VARCHAR},
+      </if>
+      <if test="classesCard != null">
+        classes_card = #{classesCard,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id}
+  </update>
+  
+  <update id="update2" parameterType="com.bky.model.Dormitory">
+    update dormitory
+    <set>
+      <if test="department != null">
+        department = #{department,jdbcType=VARCHAR},
+      </if>
+      <if test="build != null">
+        build = #{build,jdbcType=VARCHAR},
+      </if>
+      <if test="dormNum != null">
+        dorm_num = #{dormNum,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id}
+  </update>
+  
+  <update id="update3" parameterType="com.bky.model.Student">
+    update student
+    <set>
+      <if test="stuNumber != null">
+        stu_number = #{stuNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null">
+        sex = #{sex,jdbcType=VARCHAR},
+      </if>
+      <if test="classesId != null">
+        classes_id = #{classesId},
+      </if>
+      <if test="dormitoryId != null">
+        dormitory_id = #{dormitoryId},
+      </if>
+        update_time = now(),
+    </set>
+    where id = #{id}
+  </update>
+</mapper>
